@@ -8,12 +8,29 @@ const {
 	GraphQLSchema // takes RootQuery and returns GraphQL Schema
 } = graphql
 
+const CompanyType = new GraphQLObjectType({
+	name: 'Company',
+	fields: {
+		id: { type: GraphQLInt },
+		name: { type: GraphQLString },
+		description: { type: GraphQLString }
+	}
+})
+
 const UserType = new GraphQLObjectType({
 	name: 'User',
 	fields: {
 		id: { type: GraphQLInt },
 		firstName: { type: GraphQLString },
-		age: { type: GraphQLInt }
+		age: { type: GraphQLInt },
+		// relationship
+		company: {
+			type: CompanyType,
+			resolve(parentValue, args) {
+				return axios.get(`http://localhost:3000/company/${parentValue.companyId}`)
+					.then(res => res.data)
+			}
+		}
 	}
 })
 
