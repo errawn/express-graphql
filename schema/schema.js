@@ -5,33 +5,43 @@ const {
 	GraphQLObjectType,
 	GraphQLInt,
 	GraphQLString,
-	GraphQLSchema // takes RootQuery and returns GraphQL Schema
+	GraphQLSchema, // takes RootQuery and returns GraphQL Schema
+	GraphQLList
 } = graphql
 
 const CompanyType = new GraphQLObjectType({
 	name: 'Company',
-	fields: {
+	fields: () => ({
 		id: { type: GraphQLInt },
 		name: { type: GraphQLString },
-		description: { type: GraphQLString }
-	}
+		description: { type: GraphQLString },
+		//relationship
+		users: {
+			type: new GraphQLList(UserType), // tell GraphQL to associate multiple user
+			resolve(parentValue, args) {
+				console.log(parentValue.id)
+				return axios.get(`http://localhost:3000/companies/${parentValue.id}/users`)
+					.then(res => res.data)
+			}
+		}
+	})
 })
 
 const UserType = new GraphQLObjectType({
 	name: 'User',
-	fields: {
-		id: { type: GraphQLInt },
+	fields: () => ({
+		id: { type: GraphQLString },
 		firstName: { type: GraphQLString },
 		age: { type: GraphQLInt },
 		// relationship
 		company: {
 			type: CompanyType,
 			resolve(parentValue, args) {
-				return axios.get(`http://localhost:3000/company/${parentValue.companyId}`)
+				return axios.get(`http://localhost:3000/companies/${parentValue.companyId}`)
 					.then(res => res.data)
 			}
 		}
-	}
+	})
 })
 
 // Get specific record of all graphs of records
@@ -40,11 +50,19 @@ const RootQuery = new GraphQLObjectType({
 	fields: {
 		user: {
 			type: UserType,
-			args: { id: { type: GraphQLInt } },	// id as argument. Will be avaible at args in resolve
+			args: { id: { type: GraphQLString } },	// id as argument. Will be avaible at args in resolve
 			// resolve() returns data
 			resolve(parentValue, args) {
 				return axios.get(`http://localhost:3000/users/${args.id}`)
 					.then(resp => resp.data)
+			}
+		},
+		company: {
+			type: CompanyType,
+			args: { id: { type: GraphQLString } },
+			resolve(parentValue, args) {
+				return axios.get(`http://localhost:3000/companies/${args.id}`)
+					.then(res => res.data)
 			}
 		}
 	}
