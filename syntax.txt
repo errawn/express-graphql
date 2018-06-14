@@ -1,0 +1,31 @@
+// Getting list of companies
+
+{
+  company(id: "1") {
+  	name
+  	description
+  }
+}
+
+
+// getting list of companies using fragment
+{
+  company(id: "1") {
+  	...companyDetails
+  }
+}
+
+fragment companyDetails on Company {
+  name
+  description
+}
+
+// mutation
+
+mutation addUser {
+  user: addUser(firstName: "Lucas", age: 1) {
+    id
+    firstName
+    age
+  }
+}
