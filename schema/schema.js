@@ -22,7 +22,6 @@ const CompanyType = new GraphQLObjectType({
 		users: {
 			type: new GraphQLList(UserType), // tell GraphQL to associate multiple user
 			resolve(parentValue, args) {
-				console.log(parentValue.id)
 				return axios.get(`${ROOT_URL}/companies/${parentValue.id}/users`)
 					.then(res => res.data)
 			}
